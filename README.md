@@ -62,3 +62,9 @@ func ServerAddresses(server_addresses_cfg string, logger hclog.Logger) ([]string
    return addresses, err
 }
 ```
+
+## Testing
+
+```bash
+$ go test
+```

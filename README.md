@@ -10,21 +10,21 @@ go get -u github.com/hashicorp/go-netaddrs/cmd/netaddrs
 
 Example usage
 
-```
+```bash
 $ netaddrs -q ip "exec=/usr/local/bin/query_ec2.sh"
 
 # Output
 172.25.19.221 172.25.24.182 172.25.21.52
 ```
 
-```
+```bash
 $ netaddrs -q ip "exec=discover -q addrs provider=aws region=us-west-2 tag_key=consul-server tag_value=true"
 
 # Output
 172.25.19.221 172.25.24.182 172.25.21.52
 ```
 
-```
+```bash
 $ netaddrs -q ip "consul-cluster.private.consul.11eb5b95-2882-0215-b2c7-0242ac11000d.aws.hcp.dev"
 
 # Output
@@ -40,7 +40,7 @@ go get -u github.com/hashicorp/go-netaddrs
 ```
 
 Usage sample:
-```
+```Go
 import netaddrs "github.com/hashicorp/go-netaddrs"
 
 func ServerAddresses(server_addresses_cfg string, logger hclog.Logger) ([]string, error) {

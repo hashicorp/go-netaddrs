@@ -1,6 +1,6 @@
-## Command Line Tool Usage
-
 Inspired by [go-discover](https://github.com/hashicorp/go-discover), `go-netaddrs` is a Go (golang) library and command line tool to discover ip addresses of nodes in a customizable fashion suitable for any environment.
+
+## Command Line Tool Usage
 
 Install the command line tool with:
 

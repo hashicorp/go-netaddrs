@@ -38,19 +38,20 @@ func TestIPAddrsDNSFail(t *testing.T) {
 
 func TestIPAddrsCustomExecutable(t *testing.T) {
 	testcases := []struct {
-		name    string
-		cmd     string
-		invalid bool
+		name      string
+		cmd       string
+		expectErr bool
 	}{
 		{"custom executable without args", "exec=sample_scripts/ipaddrs_valid_without_args.sh", false},
 		{"custom executable with args and same line output", "exec=sample_scripts/ipaddrs_valid_with_args.sh same-line", false},
 		{"custom executable with args and multi line output", "exec=sample_scripts/ipaddrs_valid_with_args.sh multi-line", false},
-		{"custom executable with invalid ip address output", "exec=sample_scripts/ipaddrs_invalid.sh", true},
+		{"custom executable with invalid ip address output", "exec=sample_scripts/ipaddrs_invalid1", true},
+		{"custom executable returned error", "exec=sample_scripts/ipaddrs_invalid2.sh", true},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			retIPAddrs, err := IPAddrs(tc.cmd, log.New(ioutil.Discard, "netaddrs: ", 0))
-			if tc.invalid {
+			if tc.expectErr {
 				if err == nil {
 					t.Fatalf("Expected error on running executable.")
 				}

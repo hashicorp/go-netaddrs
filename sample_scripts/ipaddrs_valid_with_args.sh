@@ -7,11 +7,11 @@ cat << EndOfMessage
 EndOfMessage
 }
 
-multi_line() {
+multi_line_ipv6() {
 cat << EndOfMessage
-"172.25.41.79"
-    "172.25.16.77"
-"172.25.42.80"
+"2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+    "fe80::1ff:fe23:4567:890a%3"
+"2001:db8::"
 EndOfMessage
 }
 
@@ -20,5 +20,5 @@ if [[ $1 -eq "same-line" ]]; then
 fi
 
 if [[ $1 -eq "multi-line" ]]; then
-    multi_line
+    multi_line_ipv6
 fi

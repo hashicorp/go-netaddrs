@@ -81,11 +81,17 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	var addrs []net.IPAddr
 	for _, addr := range execAddrs {
 		addr = trimQuotes(addr)
-		ipaddr := net.ParseIP(addr)
+		splitaddr := strings.Split(addr, "%")
+		ipaddr := net.ParseIP(splitaddr[0])
 		if ipaddr == nil {
-			return nil, fmt.Errorf("Invalid IP address: %s.", addr)
+			return nil, fmt.Errorf("Invalid IP address: %s.", splitaddr[0])
 		}
-		addrs = append(addrs, net.IPAddr{IP: ipaddr})
+		if len(splitaddr) == 2 {
+			// ipv6 address
+			addrs = append(addrs, net.IPAddr{IP: ipaddr, Zone: splitaddr[1]})
+		} else {
+			addrs = append(addrs, net.IPAddr{IP: ipaddr})
+		}
 	}
 
 	l.Println("Addresses retrieved from the executable: ", addrs)

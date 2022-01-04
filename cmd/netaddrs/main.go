@@ -38,7 +38,11 @@ func main() {
 
 	var outputAddresses []string
 	for _, address := range addresses {
-		outputAddresses = append(outputAddresses, address.IP.String())
+		outputAddress := address.IP.String()
+		if address.Zone != "" {
+			outputAddress += "%" + address.Zone
+		}
+		outputAddresses = append(outputAddresses, outputAddress)
 	}
 
 	fmt.Println(strings.Join(outputAddresses, " "))

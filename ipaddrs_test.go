@@ -10,7 +10,7 @@ import (
 
 func validIPAddrs(ipaddrs []net.IPAddr) error {
 	for _, addr := range ipaddrs {
-		ipaddr := net.ParseIP(addr.String())
+		ipaddr := net.ParseIP(addr.IP.String())
 		if ipaddr == nil {
 			return fmt.Errorf("Invalid IP address format: %s.", addr)
 		}
@@ -44,7 +44,7 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 	}{
 		{"custom executable without args", "exec=sample_scripts/ipaddrs_valid_without_args.sh", false},
 		{"custom executable with args and same line output", "exec=sample_scripts/ipaddrs_valid_with_args.sh same-line", false},
-		{"custom executable with args and multi line output", "exec=sample_scripts/ipaddrs_valid_with_args.sh multi-line", false},
+		{"custom executable with args and multi line ipv6 addresses", "exec=sample_scripts/ipaddrs_valid_with_args.sh multi-line", false},
 		{"custom executable with invalid ip address output", "exec=sample_scripts/ipaddrs_invalid1", true},
 		{"custom executable returned error", "exec=sample_scripts/ipaddrs_invalid2.sh", true},
 	}

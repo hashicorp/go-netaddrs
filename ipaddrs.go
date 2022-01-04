@@ -59,7 +59,7 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-	outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	outStr, errStr := stdout.String(), stderr.String()
 
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {

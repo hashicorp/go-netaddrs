@@ -15,10 +15,10 @@ cat << EndOfMessage
 EndOfMessage
 }
 
-if [[ $1 -eq "same-line" ]]; then
+if [[ "$1" == "same-line" ]]; then
     same_line
 fi
 
-if [[ $1 -eq "multi-line" ]]; then
+if [[ "$1" == "multi-line" ]]; then
     multi_line_ipv6
 fi

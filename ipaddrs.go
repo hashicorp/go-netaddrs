@@ -14,13 +14,21 @@ import (
 	"strings"
 )
 
-func trimQuotes(s string) string {
-	if len(s) >= 2 {
-		if s[0] == '"' && s[len(s)-1] == '"' {
-			return s[1 : len(s)-1]
-		}
+// IPAddrs returns IP addresses given a
+// 1. DNS name, OR
+// 2. custom executable with optional args specified in format "exec=<executable with optional args>", which
+//  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
+//  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
+func IPAddrs(cfg string, l *log.Logger) ([]net.IPAddr, error) {
+	if !strings.HasPrefix(cfg, "exec=") {
+		return resolveDNS(cfg, l)
 	}
-	return s
+
+	ips, err := execCmd(cfg, l)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve IP addresses from executable: %w", err)
+	}
+	return ips, nil
 }
 
 // resolveDNS resolves the given DNS name and returns IP addresses
@@ -92,19 +100,11 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	return addrs, nil
 }
 
-// IPAddrs returns IP addresses given a
-// 1. DNS name, OR
-// 2. custom executable with optional args specified in format "exec=<executable with optional args>", which
-//  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
-//  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
-func IPAddrs(cfg string, l *log.Logger) ([]net.IPAddr, error) {
-	if !strings.HasPrefix(cfg, "exec=") {
-		return resolveDNS(cfg, l)
+func trimQuotes(s string) string {
+	if len(s) >= 2 {
+		if s[0] == '"' && s[len(s)-1] == '"' {
+			return s[1 : len(s)-1]
+		}
 	}
-
-	ips, err := execCmd(cfg, l)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve IP addresses from executable: %w", err)
-	}
-	return ips, nil
+	return s
 }

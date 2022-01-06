@@ -63,7 +63,7 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("Error retrieving addresses on running the executable. Exit code: %d. Error message: %s", exitError.ExitCode(), errStr)
+			return nil, fmt.Errorf("executable failed with exit code %d: %s", exitError.ExitCode(), errStr)
 		}
 		return nil, fmt.Errorf("Error retrieving addresses on running the executable. %s", err)
 	}
@@ -84,7 +84,7 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 		splitaddr := strings.Split(addr, "%")
 		ipaddr := net.ParseIP(splitaddr[0])
 		if ipaddr == nil {
-			return nil, fmt.Errorf("Invalid IP address: %s.", splitaddr[0])
+			return nil, fmt.Errorf("executable returned invalid IP address: %s", splitaddr[0])
 		}
 		if len(splitaddr) == 2 {
 			// ipv6 address
@@ -105,7 +105,6 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 //  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
 //  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
 func IPAddrs(cfg string, l *log.Logger) ([]net.IPAddr, error) {
-
 	if !strings.HasPrefix(cfg, "exec=") {
 		return resolveDNS(cfg, l)
 	}

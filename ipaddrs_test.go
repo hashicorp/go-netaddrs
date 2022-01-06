@@ -79,12 +79,12 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 		{
 			name:      "custom executable with invalid ip address output",
 			cmd:       "exec=sample_scripts/ipaddrs_invalid1.sh",
-			expectErr: "Invalid IP address: 172.25.16.77:8080.",
+			expectErr: "executable returned invalid IP address: 172.25.16.77:8080",
 		},
 		{
 			name:      "custom executable returned error",
 			cmd:       "exec=sample_scripts/ipaddrs_invalid2.sh",
-			expectErr: "ERROR! No Consul servers found.",
+			expectErr: "executable failed with exit code 1: ERROR! No Consul servers found.",
 		},
 	}
 	for _, tc := range testcases {

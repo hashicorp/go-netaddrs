@@ -2,8 +2,6 @@ package netaddrs
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net"
 	"reflect"
 	"strings"
@@ -21,7 +19,7 @@ func validIPAddrs(ipaddrs []net.IPAddr) error {
 }
 
 func TestIPAddrsDNS(t *testing.T) {
-	retIPAddrs, err := IPAddrs("google.com", log.New(ioutil.Discard, "netaddrs: ", 0))
+	retIPAddrs, err := IPAddrs("google.com", noopLogger{})
 	if err != nil {
 		t.Fatalf("Error resolving DNS name to IP addresses. %s", err)
 	}
@@ -31,8 +29,13 @@ func TestIPAddrsDNS(t *testing.T) {
 	}
 }
 
+type noopLogger struct{}
+
+func (l noopLogger) Debug(msg string, args ...interface{}) {
+}
+
 func TestIPAddrsDNSFail(t *testing.T) {
-	_, err := IPAddrs("invalidDNSname", log.New(ioutil.Discard, "netaddrs: ", 0))
+	_, err := IPAddrs("invalidDNSname", noopLogger{})
 	if err == nil {
 		t.Fatalf("Expected error on invalid DNS name")
 	}
@@ -47,7 +50,7 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 	}
 
 	run := func(t *testing.T, tc testCase) {
-		actual, err := IPAddrs(tc.cmd, log.New(ioutil.Discard, "netaddrs: ", 0))
+		actual, err := IPAddrs(tc.cmd, noopLogger{})
 		if tc.expectErr != "" {
 			if err == nil {
 				t.Fatalf("Expected error return, got nil")

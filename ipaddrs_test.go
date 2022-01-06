@@ -37,34 +37,56 @@ func TestIPAddrsDNSFail(t *testing.T) {
 }
 
 func TestIPAddrsCustomExecutable(t *testing.T) {
-	testcases := []struct {
+	type testCase struct {
 		name      string
 		cmd       string
 		expectErr bool
-	}{
-		{"custom executable without args", "exec=sample_scripts/ipaddrs_valid_without_args.sh", false},
-		{"custom executable with args and same line output", "exec=sample_scripts/ipaddrs_valid_with_args.sh same-line", false},
-		{"custom executable with args and multi line ipv6 addresses", "exec=sample_scripts/ipaddrs_valid_with_args.sh multi-line", false},
-		{"custom executable with invalid ip address output", "exec=sample_scripts/ipaddrs_invalid1", true},
-		{"custom executable returned error", "exec=sample_scripts/ipaddrs_invalid2.sh", true},
+	}
+
+	run := func(t *testing.T, tc testCase) {
+		retIPAddrs, err := IPAddrs(tc.cmd, log.New(ioutil.Discard, "netaddrs: ", 0))
+		if tc.expectErr {
+			if err == nil {
+				t.Fatalf("Expected error on running executable.")
+			}
+			return
+		}
+		if err != nil {
+			t.Fatalf("Error retrieving IP addrs on running executable. %s", err)
+		}
+		err = validIPAddrs(retIPAddrs)
+		if err != nil {
+			t.Fatalf("IP address invalid. %s", err)
+		}
+	}
+
+	testcases := []testCase{
+		{
+			name: "custom executable without args",
+			cmd:  "exec=sample_scripts/ipaddrs_valid_without_args.sh",
+		},
+		{
+			name: "custom executable with args and same line output",
+			cmd:  "exec=sample_scripts/ipaddrs_valid_with_args.sh same-line",
+		},
+		{
+			name: "custom executable with args and multi line ipv6 addresses",
+			cmd:  "exec=sample_scripts/ipaddrs_valid_with_args.sh multi-line",
+		},
+		{
+			name:      "custom executable with invalid ip address output",
+			cmd:       "exec=sample_scripts/ipaddrs_invalid1",
+			expectErr: true,
+		},
+		{
+			name:      "custom executable returned error",
+			cmd:       "exec=sample_scripts/ipaddrs_invalid2.sh",
+			expectErr: true,
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			retIPAddrs, err := IPAddrs(tc.cmd, log.New(ioutil.Discard, "netaddrs: ", 0))
-			if tc.expectErr {
-				if err == nil {
-					t.Fatalf("Expected error on running executable.")
-				}
-			} else {
-				if err != nil {
-					t.Fatalf("Error retrieving IP addrs on running executable. %s", err)
-				}
-				err = validIPAddrs(retIPAddrs)
-				if err != nil {
-					t.Fatalf("IP address invalid. %s", err)
-				}
-
-			}
+			run(t, tc)
 		})
 	}
 }

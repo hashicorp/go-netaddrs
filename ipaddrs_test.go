@@ -86,6 +86,25 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 			cmd:       "exec=sample_scripts/ipaddrs_invalid2.sh",
 			expectErr: "executable failed with exit code 1: ERROR! No Consul servers found.",
 		},
+		{
+			name: "custom executable with stderr",
+			cmd:  "exec=sample_scripts/ipaddrs_valid_with_stderr.sh",
+		},
+		{
+			name:      "custom executable with no output",
+			cmd:       "exec=sample_scripts/no_output.sh",
+			expectErr: "executable returned no output",
+		},
+		{
+			name:      "custom executable not found",
+			cmd:       "exec=sample_scripts/not_found.sh",
+			expectErr: "not_found.sh: no such file or directory",
+		},
+		{
+			name:      "custom executable not executable",
+			cmd:       "exec=./ipaddrs_test.go",
+			expectErr: "permission denied",
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {

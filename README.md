@@ -2,7 +2,7 @@ Inspired by [go-discover](https://github.com/hashicorp/go-discover), `go-netaddr
 1. DNS name, OR
 2. custom executable with optional args which (refer to examples under the folder `sample_scripts/`):
     * on success - exits with 0 and prints whitespace delimited IP (v4/v6) addresses to stdout.
-    * on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
+    * on failure - exits with a non-zero code and optionally prints an error message of up to 1024 bytes to stderr.
 
 ## Command Line Tool Usage
 

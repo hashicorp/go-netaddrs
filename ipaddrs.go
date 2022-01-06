@@ -27,7 +27,7 @@ func trimQuotes(s string) string {
 func resolveDNS(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	ips, err := net.LookupIP(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("Could not resolve DNS name: %s. error: %s", cfg, err)
+		return nil, fmt.Errorf("failed to resolve DNS name: %s: %s", cfg, err)
 	}
 
 	var addrs []net.IPAddr
@@ -58,24 +58,17 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	outStr, errStr := stdout.String(), stderr.String()
 
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("Error retrieving addresses on running the executable. Exit code: %d. Error message: %s", exitError.ExitCode(), errStr)
+			return nil, fmt.Errorf("executable failed with exit code %d: %s", exitError.ExitCode(), strings.TrimSpace(stderr.String()))
 		}
-		return nil, fmt.Errorf("Error retrieving addresses on running the executable. %s", err)
+		return nil, err
 	}
 
-	if len(errStr) > 0 {
-		return nil, fmt.Errorf("Error retrieving addresses on running the executable. Details: %s", errStr)
-	}
-
-	execAddrs := strings.Fields(outStr)
-
+	execAddrs := strings.Fields(stdout.String())
 	if len(execAddrs) < 1 {
-		return nil, fmt.Errorf("Error retrieving addresses. Executable output: %s", outStr)
+		return nil, fmt.Errorf("executable returned no output to stdout")
 	}
 
 	var addrs []net.IPAddr
@@ -84,7 +77,7 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 		splitaddr := strings.Split(addr, "%")
 		ipaddr := net.ParseIP(splitaddr[0])
 		if ipaddr == nil {
-			return nil, fmt.Errorf("Invalid IP address: %s.", splitaddr[0])
+			return nil, fmt.Errorf("executable returned invalid IP address: %s", splitaddr[0])
 		}
 		if len(splitaddr) == 2 {
 			// ipv6 address
@@ -105,10 +98,13 @@ func execCmd(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 //  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
 //  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
 func IPAddrs(cfg string, l *log.Logger) ([]net.IPAddr, error) {
-
 	if !strings.HasPrefix(cfg, "exec=") {
 		return resolveDNS(cfg, l)
 	}
 
-	return execCmd(cfg, l)
+	ips, err := execCmd(cfg, l)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve IP addresses from executable: %w", err)
+	}
+	return ips, nil
 }

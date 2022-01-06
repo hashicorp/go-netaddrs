@@ -4,6 +4,7 @@ package netaddrs
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 	"os/exec"
@@ -25,12 +26,14 @@ import (
 //    on success - exit 0 and print whitespace delimited IP addresses to stdout.
 //    on failure - exits with a non-zero code, and should print an error message
 //                 of up to 1024 bytes to stderr.
-func IPAddrs(cfg string, l Logger) ([]net.IPAddr, error) {
+//
+// Use ctx to cancel the operation or set a deadline.
+func IPAddrs(ctx context.Context, cfg string, l Logger) ([]net.IPAddr, error) {
 	if !strings.HasPrefix(cfg, "exec=") {
-		return resolveDNS(cfg, l)
+		return resolveDNS(ctx, cfg, l)
 	}
 
-	ips, err := execCmd(cfg, l)
+	ips, err := execCmd(ctx, cfg, l)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve IP addresses from executable: %w", err)
 	}
@@ -45,18 +48,12 @@ type Logger interface {
 }
 
 // resolveDNS resolves the given DNS name and returns IP addresses
-func resolveDNS(cfg string, l Logger) ([]net.IPAddr, error) {
-	ips, err := net.LookupIP(cfg)
+func resolveDNS(ctx context.Context, host string, l Logger) ([]net.IPAddr, error) {
+	addrs, err := net.DefaultResolver.LookupIPAddr(ctx, host)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve DNS name: %s: %s", cfg, err)
+		return nil, fmt.Errorf("failed to resolve DNS name: %s: %s", host, err)
 	}
-
-	var addrs []net.IPAddr
-	for _, ip := range ips {
-		addrs = append(addrs, net.IPAddr{IP: ip})
-	}
-
-	l.Debug("Resolved DNS name", "name", cfg, "ip-addrs", addrs)
+	l.Debug("Resolved DNS name", "name", host, "ip-addrs", addrs)
 
 	return addrs, nil
 }
@@ -65,7 +62,7 @@ func resolveDNS(cfg string, l Logger) ([]net.IPAddr, error) {
 // "exec=<executable with optional args>", which
 //  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
 //  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
-func execCmd(cfg string, l Logger) ([]net.IPAddr, error) {
+func execCmd(ctx context.Context, cfg string, l Logger) ([]net.IPAddr, error) {
 	// exec=<executable arg1 arg2>
 	executableWithArgs := strings.Split(cfg, "exec=")[1]
 	commandWithArgs := strings.Fields(executableWithArgs)
@@ -74,7 +71,7 @@ func execCmd(cfg string, l Logger) ([]net.IPAddr, error) {
 
 	l.Debug("Executing command", "command", command, "args", cmdArgs)
 
-	cmd := exec.Command(command, cmdArgs...)
+	cmd := exec.CommandContext(ctx, command, cmdArgs...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

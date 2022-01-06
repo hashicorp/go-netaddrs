@@ -55,7 +55,7 @@ func ServerAddresses(server_addresses_cfg string, logger hclog.Logger) ([]string
    // exec=query_ec2.sh
    // exec=discover -q addrs provider=aws region=us-west-2 tag_key=consul-server tag_value=true
 
-   addresses, err := netaddrs.IPAddrs(server_addresses_cfg, logger)
+   addresses, err := netaddrs.IPAddrs(context.Background(), server_addresses_cfg, logger)
    if err != nil {
        logger.Error("Error retrieving server addresses", err)
        return nil, err

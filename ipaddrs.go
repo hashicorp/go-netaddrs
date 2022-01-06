@@ -1,8 +1,5 @@
-// Package netaddrs provides a function to get IP addresses given a
-// 1. DNS name, OR
-// 2. custom executable with optional args which
-//  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
-//  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
+// Package netaddrs provides a function to get IP addresses from a DNS request or
+// by executing a binary.
 package netaddrs
 
 import (
@@ -14,11 +11,21 @@ import (
 	"strings"
 )
 
-// IPAddrs returns IP addresses given a
-// 1. DNS name, OR
-// 2. custom executable with optional args specified in format "exec=<executable with optional args>", which
-//  a. on success - exits 0 and prints whitespace delimited IP addresses to stdout.
-//  b. on failure - exits with a non-zero code and/or optionally prints an error message of up to 1024 bytes to stderr.
+// IPAddrs looks up and returns IP addresses using the method described by cfg.
+//
+// If cfg is a DNS name IP addresses are looked up by querying the default
+// DNS resolver for A and AAAA records associated with the DNS name.
+//
+// If cfg has an exec= prefix, IP addresses are looked up by executing the command
+// after exec=. The command may include optional arguments. Command arguments
+// must be space separated (spaces in argument values can not be escaped).
+// The command may output IPv4 or IPv6 addresses, and IPv6 addresses can
+// optionally include a zone index.
+// The executable must follow these rules:
+//
+//    on success - exit 0 and print whitespace delimited IP addresses to stdout.
+//    on failure - exits with a non-zero code, and should print an error message
+//                 of up to 1024 bytes to stderr.
 func IPAddrs(cfg string, l *log.Logger) ([]net.IPAddr, error) {
 	if !strings.HasPrefix(cfg, "exec=") {
 		return resolveDNS(cfg, l)

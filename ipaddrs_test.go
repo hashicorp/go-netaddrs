@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"strings"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ func validIPAddrs(ipaddrs []net.IPAddr) error {
 	for _, addr := range ipaddrs {
 		ipaddr := net.ParseIP(addr.IP.String())
 		if ipaddr == nil {
-			return fmt.Errorf("Invalid IP address format: %s.", addr)
+			return fmt.Errorf("invalid IP address format: %s.", addr)
 		}
 	}
 	return nil
@@ -40,22 +41,24 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 	type testCase struct {
 		name      string
 		cmd       string
-		expectErr bool
+		expectErr string
 	}
 
 	run := func(t *testing.T, tc testCase) {
 		retIPAddrs, err := IPAddrs(tc.cmd, log.New(ioutil.Discard, "netaddrs: ", 0))
-		if tc.expectErr {
+		if tc.expectErr != "" {
 			if err == nil {
-				t.Fatalf("Expected error on running executable.")
+				t.Fatalf("Expected error return, got nil")
+			}
+			if actual := err.Error(); !strings.Contains(actual, tc.expectErr) {
+				t.Fatalf("Expected error %q to contain %q", actual, tc.expectErr)
 			}
 			return
 		}
 		if err != nil {
 			t.Fatalf("Error retrieving IP addrs on running executable. %s", err)
 		}
-		err = validIPAddrs(retIPAddrs)
-		if err != nil {
+		if err = validIPAddrs(retIPAddrs); err != nil {
 			t.Fatalf("IP address invalid. %s", err)
 		}
 	}
@@ -75,13 +78,13 @@ func TestIPAddrsCustomExecutable(t *testing.T) {
 		},
 		{
 			name:      "custom executable with invalid ip address output",
-			cmd:       "exec=sample_scripts/ipaddrs_invalid1",
-			expectErr: true,
+			cmd:       "exec=sample_scripts/ipaddrs_invalid1.sh",
+			expectErr: "Invalid IP address: 172.25.16.77:8080.",
 		},
 		{
 			name:      "custom executable returned error",
 			cmd:       "exec=sample_scripts/ipaddrs_invalid2.sh",
-			expectErr: true,
+			expectErr: "ERROR! No Consul servers found.",
 		},
 	}
 	for _, tc := range testcases {

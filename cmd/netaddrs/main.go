@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -30,8 +31,7 @@ func main() {
 		w = ioutil.Discard
 	}
 	l := log.New(w, "netaddrs: ", 0)
-	addresses, err := netaddrs.IPAddrs(args[1], l)
-
+	addresses, err := netaddrs.IPAddrs(context.Background(), args[1], logger{l: l})
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -46,4 +46,13 @@ func main() {
 	}
 
 	fmt.Println(strings.Join(outputAddresses, " "))
+}
+
+type logger struct {
+	l *log.Logger
+}
+
+func (l logger) Debug(msg string, args ...interface{}) {
+	l.l.Print(msg)
+	l.l.Println(args...)
 }

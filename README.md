@@ -1,3 +1,9 @@
+# WORK IN PROGRESS
+
+This library is still under development and hence subject to breaking changes.
+
+## Summary
+
 Inspired by [go-discover](https://github.com/hashicorp/go-discover), `go-netaddrs` is a Go (golang) library and command line tool to discover ip addresses of nodes in a customizable fashion suitable for any environment. It returns IP addresses (IPv4 or IPv6) given a
 1. DNS name, OR
 2. custom executable with optional args which (refer to examples under the folder `sample_scripts/`):

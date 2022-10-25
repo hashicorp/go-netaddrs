@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -28,7 +27,7 @@ func main() {
 
 	var w io.Writer = os.Stderr
 	if quiet {
-		w = ioutil.Discard
+		w = io.Discard
 	}
 	l := log.New(w, "netaddrs: ", 0)
 	addresses, err := netaddrs.IPAddrs(context.Background(), args[1], logger{l: l})

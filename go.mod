@@ -1,3 +1,3 @@
 module github.com/hashicorp/go-netaddrs
 
-go 1.17
+go 1.19

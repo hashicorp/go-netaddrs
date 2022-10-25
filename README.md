@@ -1,4 +1,4 @@
-[![GoDoc](https://pkg.go.dev/github.com/hashicorp/go-netaddrs?status.svg)](https://pkg.go.dev/github.com/hashicorp/go-netaddrs)
+[![GoDoc](https://pkg.go.dev/badge/github.com/hashicorp/go-netaddrs)](https://pkg.go.dev/github.com/hashicorp/go-netaddrs)
 
 ## Summary
 

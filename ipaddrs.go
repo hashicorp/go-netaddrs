@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package netaddrs provides a function to get IP addresses from a DNS request or
 // by executing a binary.
 package netaddrs
